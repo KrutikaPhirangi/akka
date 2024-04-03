@@ -1,7 +1,9 @@
+package akka
+
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import scala.concurrent.duration._
 
-class ActorA(actorB: ActorRef) extends Actor {
+ class ActorA(actorB: ActorRef) extends Actor {
   import context.dispatcher
   def receive: Receive = {
     case "startLoop" =>
@@ -10,7 +12,7 @@ class ActorA(actorB: ActorRef) extends Actor {
       context.system.scheduler.scheduleOnce(5.seconds, self, "sendMessage")
   }
 
-  def looping: Receive = {
+  private def looping: Receive = {
     case "sendMessage" =>
       println("Sending message to actor B")
       actorB ! "Hi.. this is message from actor A"
@@ -20,7 +22,7 @@ class ActorA(actorB: ActorRef) extends Actor {
   }
 }
 
-class ActorB extends Actor {
+ class ActorB extends Actor {
   def receive: Receive = {
     case msg: String =>
       println(s"Received message from actorA: $msg")
@@ -29,10 +31,11 @@ class ActorB extends Actor {
   }
 }
 
-object Main extends App {
+ object Main extends App {
   private val system = ActorSystem("HelloSystem")
 
   private val actorB = system.actorOf(Props[ActorB], "actorB")
   private val actorA = system.actorOf(Props(new ActorA(actorB)), name = "actorA")
   actorA ! "startLoop"
 }
+
